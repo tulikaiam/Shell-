@@ -1,2 +1,2 @@
 # Shell-
-shell implementation in C
+Shell implementation in C with python embedding
