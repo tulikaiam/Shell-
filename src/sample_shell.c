@@ -93,7 +93,7 @@ void welcomeScreen(){
         printf("\n\t============================================\n");
         printf("\t               Simple C Shell\n");
         printf("\t--------------------------------------------\n");
-        printf("\t             Licensed under GPLv3:\n");
+        printf("\t             Copyright-320|324|327:\n");
         printf("\t============================================\n");
         printf("\n\n");
 }
