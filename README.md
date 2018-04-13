@@ -18,8 +18,8 @@ Features
         `<cmd> <args> < <input> > <output>`
 * Background execution of programs with `&`
 * Piping implemented (`<cmd1> | <cmd2>`) via `pipe` and `dup2` syscalls. Multiple piping is allowed.
-* Editor implemented. Type the below in the shell to enable text editor feature.
-	editor 
+* Editor implemented. Type (`editor`) in the shell to enable text editor feature.
+	
 
 Test
 --------
