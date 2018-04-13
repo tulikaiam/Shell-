@@ -200,7 +200,12 @@ while(1){
     	chdir(argv[1]);
     	printf("cd executed\n");
     }
-    //pipes
+    //editor
+    else if(strcmp(argv[0],"edit")==0)
+    {
+      printf("Executing your Python script...");
+    	system("python editor_new.py");
+    }
 
     //Aliasing
     else if(strcmp(argv[0],"alias")==0)
