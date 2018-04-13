@@ -1,8 +1,8 @@
-import tkinter
-from tkinter import *
-import tkinter.scrolledtext as tkst
-import filedialog
-import messagebox
+import Tkinter
+from Tkinter import *
+import ScrolledText as tkst
+import tkFileDialog as tkfd
+import tkMessageBox as tkmb
 
 root = Tk(className=" Just another Text Editor")
 textPad = tkst.ScrolledText(root, width=100, height=80)
@@ -10,26 +10,26 @@ textPad = tkst.ScrolledText(root, width=100, height=80)
 # create a menu & define functions for each menu item
 
 def open_command():
-        file = filedialog.askopenfile(parent=root,mode='rb',title='Select a file')
+        file = tkfd.askopenfile(parent=root,mode='rb',title='Select a file')
         if file != None:
             contents = file.read()
             textPad.insert('1.0',contents)
             file.close()
 
-def save_command(self):
-    file = filedialog.asksaveasfile(mode='w')
-    if file != None:
-    # slice off the last character from get, as an extra return is added
-        data = self.textPad.get('1.0', END+'-1c')
-        file.write(data)
-        file.close()
+def file_save():
+    f = tkfd.asksaveasfile(mode='w', defaultextension=".txt")
+    if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
+        return
+    text2save = str(textPad.get(1.0, END)) # starts from `1.0`, not `0.0`
+    f.write(text2save)
+    f.close() # `()` was missing.
 
 def exit_command():
-    if messagebox.askokcancel("Quit", "Do you really want to quit?"):
+    if tkmb.askokcancel("Quit", "Do you really want to quit?"):
         root.destroy()
 
 def about_command():
-    label = messagebox.showinfo("About", "Just Another TextPad \n Copyright \n No rights left to reserve")
+    label = tkmb.showinfo("About", "Just Another TextPad \n Copyright \n No rights left to reserve")
 
 
 def dummy():
@@ -40,7 +40,7 @@ filemenu = Menu(menu)
 menu.add_cascade(label="File", menu=filemenu)
 filemenu.add_command(label="New", command=dummy)
 filemenu.add_command(label="Open...", command=open_command)
-filemenu.add_command(label="Save", command=save_command)
+filemenu.add_command(label="Save", command=file_save)
 filemenu.add_separator()
 filemenu.add_command(label="Exit", command=exit_command)
 helpmenu = Menu(menu)
