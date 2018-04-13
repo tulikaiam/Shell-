@@ -229,6 +229,7 @@ while(1){
   		//Let's check for | symbol
   		while (argv[i] != NULL)
       {
+        //Sample pipe command cat shell.c | grep 327 ---Line number where 327 is present
     	    if (strcmp(argv[i],"|") == 0)
           {
               sig=1;
