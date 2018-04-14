@@ -210,7 +210,7 @@ while(1){
       printf("Executing your Python script...");
     	system("python editor_new.py");
     }
-		//Aliasing
+		//Aliasing -->alias ll= "ls -al"
     else if(strcmp(argv[0],"alias")==0)
     {
         	//chdir(argv[1]);
@@ -220,7 +220,8 @@ while(1){
         printf("%s\n",line1);
         token1 = strtok(line1,"=");
         int i=0;
-        while(token1!=NULL){
+        while(token1!=NULL)
+				{
             argv1[i]=token1;
             token1 = strtok(NULL,"=");
             i++;
@@ -228,8 +229,24 @@ while(1){
         argv1[i]=NULL;                     //set last value to NULL for execvp
         printf("%s\n",argv1[0]);
         printf("%s\n",argv1[1]);
-    }
-  //Pipe and normal execution
+
+				char * com_name[200];
+				char * a_com=strtok(argv1[0]," ");
+				i=0;
+				while(a_com!=NULL)
+				{
+						com_name[i]=a_com;
+						a_com = strtok(NULL," ");
+						i++;
+				}
+				//printf("%s\n",com_name[1]); ll (Short name)
+				//printf("%s\n",argv1[1]); actual command to be executed ..ex -ls -l
+
+			  FILE *pfile=fopen("aliasfile.txt","w");
+				fwrite(argv1[1],1,sizeof(argv1[1]),pfile);
+
+	}
+  //Pipe and Normal execution
    else
     {
       i=0;
