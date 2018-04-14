@@ -223,7 +223,7 @@ while(1){
     }
    else if(strcmp(argv[0],"editor")==0)
     {
-       system("python editor.py");
+       system("python editor_new.py");
     }
 
    else

@@ -1,3 +1,2 @@
-ls -l
-mkdir
-pwd
+t=ls
+f=mkdir

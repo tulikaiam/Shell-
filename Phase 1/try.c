@@ -9,46 +9,21 @@
 #include<sys/wait.h>
 #define BUFFER_LEN 100
 
-char *replaceWord(const char *s, const char *oldW,
-                                 const char *newW)
+char *replace_str(char *str, char *orig, char *rep);
+char *replace_str(char *str, char *orig, char *rep)
 {
-    char *result;
-    int i, cnt = 0;
-    int newWlen = strlen(newW);
-    int oldWlen = strlen(oldW);
+  static char buffer[4096];
+  char *p;
 
-    // Counting the number of times old word
-    // occur in the string
-    for (i = 0; s[i] != '\0'; i++)
-    {
-        if (strstr(&s[i], oldW) == &s[i])
-        {
-            cnt++;
+  if(!(p = strstr(str, orig)))  // Is 'orig' even in 'str'?
+    return str;
 
-            // Jumping to index after the old word.
-            i += oldWlen - 1;
-        }
-    }
+  strncpy(buffer, str, p-str); // Copy characters from 'str' start to 'orig' st$
+  buffer[p-str] = '\0';
 
-    // Making new string of enough length
-    result = (char *)malloc(i + cnt * (newWlen - oldWlen) + 1);
+  sprintf(buffer+(p-str), "%s%s", rep, p+strlen(orig));
 
-    i = 0;
-    while (*s)
-    {
-        // compare the substring with the result
-        if (strstr(s, oldW) == s)
-        {
-            strcpy(&result[i], newW);
-            i += newWlen;
-            s += oldWlen;
-        }
-        else
-            result[i++] = *s++;
-    }
-
-    result[i] = '\0';
-    return result;
+  return buffer;
 }
 
 
@@ -255,7 +230,7 @@ while(1){
     }
 
     //Editor
-    else if(strcmp(argv[0],"editor")==0)
+    else if(strcmp(argv[0],"edit")==0)
     {
       printf("Executing your Python script...");
     	system("python editor_new.py");
@@ -341,82 +316,40 @@ while(1){
 				token = strtok(NULL,"=");
 				i++;
 			    }
-			argv2[i]=NULL;
 			if(strcmp(argv2[0],argv[0])==0)
 			{
-				alias_found=1;
-				//strcpy(argv,argv2[1]); 
+				alias_found=1; //argv2[1] the actaul command to be excuted
+				strcpy(argv[0],argv2[1]); 
 		            //fork child
 			}
 		}
-	if(alias_found==0)
-	{
 	
-	int pid= fork(); 
-         if(pid==0)//child
-           {         
-    	
-		strcat(progpath, argv[0]); 
-         
-               execvp(progpath,argv);
-               fprintf(stderr, "Child process could not do execvp\n");
-           }
-           else
-           {                    //Parent
-               wait(NULL);
-               printf("Child exited\n");
-           }	
-	}
-	else
-	{
-		
-				 char *result = NULL;
-
-	 // oldW string
-	printf("%s",argv2[1]);
-printf("**********");
-argv2[1]=replaceWord(argv2[1],"\n","");
-	     result = replaceWord(line2,argv[0],argv2[1]);
-			 printf("%s",result);
-	printf("herere %s",argv2[1]);
-printf("**********");
-				 //printf("progpath %s",progpath);
-				 //printf("argv  %s",argv);
-
-				 char *argv1[100];
-
-				 char *token;        //split command into separate strings
-				 token = strtok(result," "); // the first token is captured here
-				 int i=0;
-				 while(token!=NULL) //All the tokens
-				{
-						 argv1[i]=token;
-						 token = strtok(NULL," ");
-						 i++;
-				 }
-				 argv1[i]=NULL;
-				 strcpy(progpath, path);           //copy /bin/ to file path
-				 strcat(progpath, argv1[0]);
-          int pid= fork();
-	         //fork child
-           if(pid==0)
-           {               //Child
-
-
-               execvp(progpath,argv1);
-               fprintf(stderr, "Child process could not do execvp\n");
-           }
-           else
-           {                    //Parent
-               wait(NULL);
-               printf("Child exited\n");
-           }
-	}
-
 	
-       }
-  	}
+	
+		int pid= fork(); 
+		 if(pid==0)//child
+		   {         
+	    	
+			strcat(progpath, argv[0]); 
+			printf("argv[0] %s \n",argv[0]);
+		 	printf("argv[1] %s \n",argv[1]);
+			argv[2]=NULL;
+		 	printf("progpath %s \n",progpath);
+			
+		       execvp(argv[0],argv);
+		       fprintf(stderr, "Child process could not do execvp\n");
+		   }
+		   else
+		   {                    //Parent
+		       wait(NULL);
+		       printf("Child exited\n");
+		   }	
+	
+ 
+    
 
 }
-
 }
+}
+}
+
