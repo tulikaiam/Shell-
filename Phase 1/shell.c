@@ -158,6 +158,8 @@ int main(){
     char progpath[20];      //full file path
     int argc;               //arg count
 FILE *fp=fopen("/home/student/his.txt","a");
+FILE *pfile=fopen("aliasfile.txt","w");
+
 while(1){
 
    printf("Shell \xC9 01FB15ECS320|324|327>> ");                   //print shell prompt
@@ -241,10 +243,13 @@ while(1){
 				}
 				//printf("%s\n",com_name[1]); ll (Short name)
 				//printf("%s\n",argv1[1]); actual command to be executed ..ex -ls -l
-
-			  FILE *pfile=fopen("aliasfile.txt","w");
+				char * command[1000];
+				strcpy(command,argv1[1]);
+				FILE *pfile=fopen("aliasfile.txt","a");
 				//printf("%s",argv1[1]);
-				fprintf(pfile,argv1[1]);
+				fprintf(pfile,"%s",command);
+				fprintf(pfile,"%s","\n");
+				fclose(pfile);
 
 	}
   //Pipe and Normal execution
