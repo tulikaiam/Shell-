@@ -3,12 +3,24 @@
 #include<string.h>
 #include<error.h>
 #include<stdlib.h>
-
 #include<unistd.h>
 #include<sys/types.h>
 #include<sys/wait.h>
+#include <fcntl.h>
+#include <termios.h>
+
 #define BUFFER_LEN 100
 
+static char* currentDirectory;
+//Shell Prompt
+void shellPrompt(){
+	// We print the prompt in the form "<user>@<host> <cwd> >"
+	char hostn[1204] = "";
+	gethostname(hostn, sizeof(hostn));
+	printf("%s@%s %s > ", getenv("LOGNAME"), hostn, getcwd(currentDirectory, 1024));
+}
+
+//Replacing a word in a string with new word
 char *replaceWord(const char *s, const char *oldW,
                                  const char *newW)
 {
@@ -51,7 +63,7 @@ char *replaceWord(const char *s, const char *oldW,
     return result;
 }
 
-
+//Handler for pipes
 void pipeHandler(char * args[]){
 	// File descriptors
 	int filedes[2]; // pos. 0 output, pos. 1 input of the pipe
@@ -191,25 +203,74 @@ void pipeHandler(char * args[]){
 	}
 }
 
+//File IO
+
+void fileIO(char * args[], char* inputFile, char* outputFile, int option){
+
+	int err = -1;
+  pid_t pid;
+	int fileDescriptor; // between 0 and 19, describing the output or input file
+
+	if((pid=fork())==-1){
+		printf("Child process could not be created\n");
+		return;
+	}
+	if(pid==0){
+		// Option 0: output redirection
+		if (option == 0){
+			// We open (create) the file truncating it at 0, for write only
+			fileDescriptor = open(outputFile, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+			// We replace de standard output with the appropriate file
+			dup2(fileDescriptor, STDOUT_FILENO);
+			close(fileDescriptor);
+		// Option 1: input and output redirection
+		}else if (option == 1){
+			// We open file for read only (it's STDIN)
+			fileDescriptor = open(inputFile, O_RDONLY, 0600);
+			// We replace de standard input with the appropriate file
+			dup2(fileDescriptor, STDIN_FILENO);
+			close(fileDescriptor);
+			// Same as before for the output file
+			fileDescriptor = open(outputFile, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+			dup2(fileDescriptor, STDOUT_FILENO);
+			close(fileDescriptor);
+		}
+
+		setenv("parent",getcwd(currentDirectory, 1024),1);
+
+		if (execvp(args[0],args)==err){
+			printf("err");
+			kill(getpid(),SIGTERM);
+		}
+	}
+	waitpid(pid,NULL,0);
+}
+
 
 int main(){
     char line[BUFFER_LEN];  //get command line
     char line1[BUFFER_LEN];
- 	char *line2;
-	line2=(char*)malloc(100*sizeof(char));
+    char *line2;
+    line2=(char*)malloc(100*sizeof(char));
     char* argv[100];        //user command
     char* argv1[100];
     char* path= "/bin/";    //set path at bin
-//    char progpath[20];      //full file path
-char *progpath;
-	progpath=(char*)malloc(100*sizeof(char));
+    //    char progpath[20];      //full file path
+    char *progpath;
+    progpath=(char*)malloc(100*sizeof(char));
     int argc;               //arg count
-FILE *fp=fopen("/home/student/his.txt","a");
-FILE *pfile=fopen("aliasfile.txt","w");
-
+    FILE *fp=fopen("/home/student/his.txt","a");
+    FILE *pfile=fopen("aliasfile.txt","w");
+     printf("\n\n");
+     printf("\t\t**********************************************\n");
+     printf("\t\t----------------Simple Shell-------------------\n ");
+     printf("\t\t**********************************************\n");
+     printf("\t\t    Copyright : Swati    Tanya     Tulika\n\n\n");
+    currentDirectory = (char*) calloc(1024, sizeof(char));
+    setenv("shell",getcwd(currentDirectory, 1024),1);
 while(1){
 
-   printf("Shell \xC9 01FB15ECS320|324|327>> ");                   //print shell prompt
+   shellPrompt();  //print shell prompt
 
    if(!fgets(line, BUFFER_LEN, stdin))
     break;
@@ -222,6 +283,8 @@ while(1){
     }
     strcpy(line1,line); //Having a copy of input
     strcpy(line2,line);
+
+    //Tokenize
     char *token;        //split command into separate strings
     token = strtok(line," "); // the first token is captured here
     int i=0;
@@ -233,21 +296,28 @@ while(1){
     }
     argv[i]=NULL;                     //set last value to NULL for execvp
     argc=i;                           //get arg count
-    //printf("%s\n",argv[0]);
-    //printf("%d\n",sizeof(argv[0]));
-   // printf("%zd",fwrite(line,1,sizeof(line),fp));
-    //fprintf(fp,"%s",line);
-    //fprintf(fp,"%s","\n");
-    for(i=0; i<argc; i++)             // Printing all the tokens
+    /*for(i=0; i<argc; i++)             // Printing all the tokens
 		{
         printf("%s\n", argv[i]);      //print command/args
-    }
+    }*/
     strcpy(progpath, path);           //copy /bin/ to file path
-           //for example /bin/mkdir
-   // printf("%s\n",progpath)   ;     //add program to path
+    //add program to path
+
+    // We look for the special characters and separate the command itself
+    // in a new array for the arguments
+   char *argv_aux[256];
+   int j=0;
+   while ( argv[j] != NULL)
+    {
+     if ( (strcmp(argv[j],">") == 0) || (strcmp(argv[j],"<") == 0) || (strcmp(argv[j],"&") == 0)){
+       break;
+     }
+     argv_aux[j] = argv[j];
+     j++;
+   }
 
    //Built ins are added separately
-	 //CD command
+   //CD command
     if(strcmp(argv[0],"cd")==0)
     {
     	chdir(argv[1]);
@@ -316,48 +386,75 @@ while(1){
               sig=1;
       				pipeHandler(argv);
           }
-  			// If '>' is detected, we have output redirection.
-  			// First we check if the structure given is the correct one,
-  			// and if that is the case we call the appropriate method
+          else if (strcmp(argv[i],"<") == 0)
+          {
+      				int aux = i+1;
+      				if (argv[aux] == NULL || argv[aux+1] == NULL || argv[aux+2] == NULL )
+              {
+      					printf("Not enough input arguments\n");
+      					return -1;
+      				}
+              else
+              {
+      					  if (strcmp(argv[aux+1],">") != 0){
+      						printf("Usage: Expected '>' and found %s\n",argv[aux+1]);
+      						return -2;
+      					}
+      				}
+      				fileIO(argv_aux,argv[i+1],argv[i+3],1);
+      				return 1;
+    			}
+    			// If '>' is detected, we have output redirection.
+    			// First we check if the structure given is the correct one,
+    			// and if that is the case we call the appropriate method
+    			else if (strcmp(argv[i],">") == 0)
+          {
+    				if (argv[i+1] == NULL)
+            {
+    					printf("Not enough input arguments\n");
+
+    				}
+    				fileIO(argv_aux,NULL,argv[i+1],0);
+
+    			}
         i++;
      }
+
 // No pipe found
       if(sig==0)
        {
          int alias_found=0;
-	char *line=NULL;
-	size_t len=0;
-	ssize_t read;
-	char *argv2[100];
-	FILE *aliasfile=fopen("aliasfile.txt","r");
-	while(read=getline(&line,&len,aliasfile)!=-1)
-		{
-			    char *token;        //split command into separate strings
-			    token = strtok(line,"="); // the first token is captured here
-			    int i=0;
-			    while(token!=NULL) //All the tokens
-					{
-				argv2[i]=token;
-				token = strtok(NULL,"=");
-				i++;
-			    }
-			argv2[i]=NULL;
-			if(strcmp(argv2[0],argv[0])==0)
-			{
-				alias_found=1;
-				//strcpy(argv,argv2[1]); 
-		            //fork child
-			}
-		}
+        char *line=NULL;
+        size_t len=0;
+        ssize_t read;
+        char *argv2[100];
+        FILE *aliasfile=fopen("aliasfile.txt","r");
+        while(read=getline(&line,&len,aliasfile)!=-1)
+	      	{
+    			    char *token;        //split command into separate strings
+    			    token = strtok(line,"="); // the first token is captured here
+    			    int i=0;
+    			    while(token!=NULL) //All the tokens
+    					{
+        				argv2[i]=token;
+        				token = strtok(NULL,"=");
+        				i++;
+    			    }
+    			   argv2[i]=NULL;
+      		  	if(strcmp(argv2[0],argv[0])==0)
+      		  	{
+      				alias_found=1;
+      				//strcpy(argv,argv2[1]);
+      		            //fork child
+      		  	}
+		     }
 	if(alias_found==0)
 	{
-	
-	int pid= fork(); 
+
+	        int pid= fork();
          if(pid==0)//child
-           {         
-    	
-		strcat(progpath, argv[0]); 
-         
+           {
+    	      	 strcat(progpath, argv[0]);
                execvp(progpath,argv);
                fprintf(stderr, "Child process could not do execvp\n");
            }
@@ -365,57 +462,43 @@ while(1){
            {                    //Parent
                wait(NULL);
                printf("Child exited\n");
-           }	
+           }
 	}
 	else
 	{
-		
-				 char *result = NULL;
 
-	 // oldW string
-	printf("%s",argv2[1]);
-printf("**********");
-argv2[1]=replaceWord(argv2[1],"\n","");
-	     result = replaceWord(line2,argv[0],argv2[1]);
-			 printf("%s",result);
-	printf("herere %s",argv2[1]);
-printf("**********");
-				 //printf("progpath %s",progpath);
-				 //printf("argv  %s",argv);
-
-				 char *argv1[100];
-
-				 char *token;        //split command into separate strings
-				 token = strtok(result," "); // the first token is captured here
-				 int i=0;
-				 while(token!=NULL) //All the tokens
-				{
-						 argv1[i]=token;
-						 token = strtok(NULL," ");
-						 i++;
-				 }
-				 argv1[i]=NULL;
-				 strcpy(progpath, path);           //copy /bin/ to file path
-				 strcat(progpath, argv1[0]);
-          int pid= fork();
-	         //fork child
-           if(pid==0)
-           {               //Child
-
-
-               execvp(progpath,argv1);
-               fprintf(stderr, "Child process could not do execvp\n");
-           }
-           else
-           {                    //Parent
-               wait(NULL);
-               printf("Child exited\n");
-           }
-	}
-
-	
-       }
-  	}
+        char *result = NULL;
+        printf("%s",argv2[1]);
+        argv2[1]=replaceWord(argv2[1],"\n","");
+        result = replaceWord(line2,argv[0],argv2[1]);
+        char *argv1[100];
+        char *token;        //split command into separate strings
+        token = strtok(result," "); // the first token is captured here
+        int i=0;
+        while(token!=NULL) //All the tokens
+        {
+            argv1[i]=token;
+            token = strtok(NULL," ");
+            i++;
+        }
+        argv1[i]=NULL;
+        strcpy(progpath, path);           //copy /bin/ to file path
+        strcat(progpath, argv1[0]);
+        int pid= fork();
+        //fork child
+        if(pid==0)
+        {               //Child
+            execvp(progpath,argv1);
+            fprintf(stderr, "Child process could not do execvp\n");
+        }
+        else
+        {                    //Parent
+            wait(NULL);
+            printf("Child exited\n");
+        }
+	   }
+   }
+ }
 
 }
 
