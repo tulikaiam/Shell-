@@ -259,7 +259,7 @@ int main(){
     char *progpath;
     progpath=(char*)malloc(100*sizeof(char));
     int argc;               //arg count
-    FILE *fp=fopen("/home/student/his.txt","a");
+    FILE *fp=fopen("his.txt","w");
     FILE *pfile=fopen("aliasfile.txt","w");
      printf("\n\n");
      printf("\t\t**********************************************\n");
@@ -274,6 +274,10 @@ while(1){
 
    if(!fgets(line, BUFFER_LEN, stdin))
     break;
+	 FILE *fp=fopen("his.txt","a");
+	 fprintf(fp,"%s",line);
+	 fprintf(fp,"%s","\n");
+	 fclose(fp);
    size_t length = strlen(line);
    if (line[length - 1] == '\n')
      line[length - 1] = '\0';                              //if user hits CTRL+D break
@@ -323,13 +327,19 @@ while(1){
     	chdir(argv[1]);
     	printf("cd executed\n");
     }
+		//History
 
+	  else if(argv[0]==27)
+		{
+			printf("Up arrow");
+		}
     //Editor
     else if(strcmp(argv[0],"editor")==0)
     {
       printf("Executing your Python script...");
     	system("python editor_new.py");
     }
+
 		//Aliasing -->alias ll= "ls -al"
     else if(strcmp(argv[0],"alias")==0)
     {
