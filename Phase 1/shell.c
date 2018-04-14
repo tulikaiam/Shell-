@@ -243,7 +243,8 @@ while(1){
 				//printf("%s\n",argv1[1]); actual command to be executed ..ex -ls -l
 
 			  FILE *pfile=fopen("aliasfile.txt","w");
-				fwrite(argv1[1],1,sizeof(argv1[1]),pfile);
+				//printf("%s",argv1[1]);
+				fprintf(pfile,argv1[1]);
 
 	}
   //Pipe and Normal execution
