@@ -157,62 +157,65 @@ int main(){
     char* path= "/bin/";    //set path at bin
     char progpath[20];      //full file path
     int argc;               //arg count
-//FILE *fp=fopen("/home/student/his.txt","a");
+FILE *fp=fopen("/home/student/his.txt","a");
 while(1){
 
-    printf("Shell \xC9 01FB15ECS320|324|327>> ");                   //print shell prompt
+   printf("Shell \xC9 01FB15ECS320|324|327>> ");                   //print shell prompt
 
    if(!fgets(line, BUFFER_LEN, stdin))
     break;
    size_t length = strlen(line);
    if (line[length - 1] == '\n')
      line[length - 1] = '\0';                              //if user hits CTRL+D break
-   if(strcmp(line, "exit")==0){            //check if command is exit
+   if(strcmp(line, "exit")==0)
+	  {            //check if command is exit
         break;
     }
- strcpy(line1,line);
-    char *token;                  //split command into separate strings
-    token = strtok(line," ");
+    strcpy(line1,line); //Having a copy of input
+    char *token;        //split command into separate strings
+    token = strtok(line," "); // the first token is captured here
     int i=0;
-    while(token!=NULL){
+    while(token!=NULL) //All the tokens
+		{
         argv[i]=token;
         token = strtok(NULL," ");
         i++;
     }
     argv[i]=NULL;                     //set last value to NULL for execvp
     argc=i;                           //get arg count
-    printf("%s\n",argv[0]);
-    printf("%d\n",sizeof(argv[0]));
+    //printf("%s\n",argv[0]);
+    //printf("%d\n",sizeof(argv[0]));
    // printf("%zd",fwrite(line,1,sizeof(line),fp));
     //fprintf(fp,"%s",line);
     //fprintf(fp,"%s","\n");
-
-  for(i=0; i<argc; i++){
+    for(i=0; i<argc; i++)             // Printing all the tokens
+		{
         printf("%s\n", argv[i]);      //print command/args
     }
     strcpy(progpath, path);           //copy /bin/ to file path
-    strcat(progpath, argv[0]);   //for example /bin/mkdir
+    strcat(progpath, argv[0]);        //for example /bin/mkdir
    // printf("%s\n",progpath)   ;     //add program to path
 
    //Built ins are added separately
+	 //CD command
     if(strcmp(argv[0],"cd")==0)
     {
     	chdir(argv[1]);
     	printf("cd executed\n");
     }
-    //editor
+
+    //Editor
     else if(strcmp(argv[0],"edit")==0)
     {
       printf("Executing your Python script...");
     	system("python editor_new.py");
     }
-
-    //Aliasing
+		//Aliasing
     else if(strcmp(argv[0],"alias")==0)
     {
         	//chdir(argv[1]);
-        	printf("alias executed\n");
-        	char *token1;
+        printf("alias executed\n");
+        char *token1;
                      //split command into separate strings
         printf("%s\n",line1);
         token1 = strtok(line1,"=");
@@ -226,7 +229,7 @@ while(1){
         printf("%s\n",argv1[0]);
         printf("%s\n",argv1[1]);
     }
-
+  //Pipe and normal execution
    else
     {
       i=0;
@@ -245,6 +248,7 @@ while(1){
   			// and if that is the case we call the appropriate method
         i++;
      }
+		 // No pipe found
       if(sig==0)
        {
           int pid= fork();              //fork child
