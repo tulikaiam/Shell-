@@ -1,4 +1,12 @@
-[A
+ls
 
-[A[A[A
+ls -l
+
+cat aliasfile.txt
+
+alias t=ls
+
+t
+
+history
 

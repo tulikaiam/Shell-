@@ -327,18 +327,39 @@ while(1){
     	chdir(argv[1]);
     	printf("cd executed\n");
     }
-		//History
 
-	  else if(argv[0]==27)
+		//History
+	  else if(strcmp(argv[0],"history")==0)
 		{
-			printf("Up arrow");
+			  printf("\n-------Commands typed so far in this session------\n");
+				FILE *fptr;
+		    char filename[100], c;
+		    fptr = fopen("his.txt", "r");
+		    if (fptr == NULL)
+		    {
+		        printf("Cannot open file \n");
+		        exit(0);
+		    }
+		   // Read contents from file
+		    c = fgetc(fptr);
+		    while (c != EOF)
+		    {
+		        printf ("%c", c);
+		        c = fgetc(fptr);
+
+		    }
+		    fclose(fptr);
+
+
 		}
+
     //Editor
     else if(strcmp(argv[0],"editor")==0)
     {
       printf("Executing your Python script...");
     	system("python editor_new.py");
     }
+
 
 		//Aliasing -->alias ll= "ls -al"
     else if(strcmp(argv[0],"alias")==0)
@@ -382,7 +403,8 @@ while(1){
 				fclose(pfile);
 
 	}
-  //Pipe and Normal execution
+
+  //Pipe and Normal execution / IO redirection
    else
     {
       i=0;
