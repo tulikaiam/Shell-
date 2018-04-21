@@ -328,8 +328,73 @@ while(1){
     	printf("cd executed\n");
     }
 
-		//History
-	  else if(strcmp(argv[0],"history")==0)
+
+
+ 
+  	//Custom functions
+ 	// 1. To find a particular file in a directory path 
+ 	else if(strcmp(argv[0],"find")==0)
+	{
+
+		char f_name[100];
+		//scanf("%s",&f_name);
+		char path[500];
+		//scanf("%s",&path);
+		char st[100];
+		strcpy(st,"python find.py");
+		strcat(st," ");
+		strcat(st,argv[1]);
+		strcat(st," ");
+		strcat(st,argv[2]);
+		printf("%s",st);
+		system(st);
+	
+	
+	
+	}
+	 
+	 
+	 else if (strcmp(argv[0],"prime")==0)
+	 {
+	 	
+		char st[100];
+		strcpy(st,"python prime.py");
+		strcat(st," ");
+		strcat(st,argv[1]);
+		printf("%s",st);
+		system(st);
+	
+	 
+	 }
+	
+	
+	
+	//2. To count the frequency of a pattern in a given directory path files
+	//3. Lists the file in which the word appears
+	else if(strcmp(argv[0],"lookfor")==0)
+	{
+
+		char f_name[100];
+		//scanf("%s",&f_name);
+		char path[500];
+		//scanf("%s",&path);
+		char st[100];
+		strcpy(st,"python search.py");
+		strcat(st," ");
+		strcat(st,argv[1]);
+		strcat(st," ");
+		strcat(st,argv[2]);
+		//printf("%s",st);
+		system(st);
+	
+	
+	
+	}
+	
+	
+	
+		//History!
+	  else if((strcmp(argv[0],"history")==0 )&& (strcmp(argv[3],"NULL")!=0))
 		{
 			  printf("\n-------Commands typed so far in this session------\n");
 				FILE *fptr;
@@ -341,17 +406,53 @@ while(1){
 		        exit(0);
 		    }
 		   // Read contents from file
-		    c = fgetc(fptr);
+		 /*   c = fgetc(fptr);
 		    while (c != EOF)
 		    {
 		        printf ("%c", c);
 		        c = fgetc(fptr);
 
-		    }
+		    }*/
+		    
+		    
+		    
+		        char *line=NULL;
+			size_t len=0;
+			ssize_t read;
+			char *argv2[100];
+			FILE *hisfile=fopen("his.txt","r");
+				    
+		while(read=getline(&line,&len,hisfile)!=-1)
+	      	{
+	      			
+    			    char *token;        //split command into separate strings
+    			    token = strtok(line,""); // the first token is captured here
+    			    int i=0;
+    			    while(token!=NULL) //All the tokens
+    					{
+        				argv2[i]=token;
+        				token = strtok(NULL,"");
+        				i++;
+    			    }
+    			   argv2[i]=NULL;
+      		  	if(strcmp(argv2[0],argv[3])==0)
+      		  	{
+      				printf("%s",line);
+      				//strcpy(argv,argv2[1]);
+      		            //fork child
+      		  	}
+		     }
+		     
+		     
+		     
+		     
 		    fclose(fptr);
 
 
-		}
+	}
+	
+	
+	
 
     //Editor
     else if(strcmp(argv[0],"editor")==0)

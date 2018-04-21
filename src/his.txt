@@ -1,12 +1,18 @@
-ls
+prime 59
 
-ls -l
+prime 5
 
-cat aliasfile.txt
+prime 4
 
-alias t=ls
+prime 89
 
-t
+prime 102
 
-history
+prime 377
+
+find *.py /home/tulika
+
+lookfor yo /home/tulika
+
+lookfor zr /home/tulika
 
